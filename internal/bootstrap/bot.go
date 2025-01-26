@@ -10,18 +10,15 @@ import (
 
 type TelegramBot struct {
 	Api *telegram.BotAPI
-
-	token       string
-	debugEnable bool
 }
 
-func NewTelegramBot(token string, debugEnable string) (*TelegramBot, error) {
+func NewTelegramBot(token string, debugEnabled string) (*TelegramBot, error) {
 	bot, err := telegram.NewBotAPI(token)
 	if err != nil {
 		return nil, err
 	}
 
-	if enabled, err := strconv.ParseBool(debugEnable); err != nil && enabled {
+	if enabled, err := strconv.ParseBool(debugEnabled); err != nil && enabled {
 		bot.Debug = true
 	}
 
@@ -30,7 +27,7 @@ func NewTelegramBot(token string, debugEnable string) (*TelegramBot, error) {
 	return &TelegramBot{Api: bot}, nil
 }
 
-func (b *TelegramBot) HandleUpdates(handlerFunc func(telegram.Update)) {
+func (b *TelegramBot) HandleUpdates(handlerFn func(telegram.Update)) {
 	u := telegram.NewUpdate(0)
 	u.Timeout = 60
 
@@ -49,6 +46,6 @@ func (b *TelegramBot) HandleUpdates(handlerFunc func(telegram.Update)) {
 			slog.Debug(fmt.Sprintf("received command: %s from %d", update.Message.Text, update.Message.Chat.ID))
 		}
 
-		handlerFunc(update)
+		handlerFn(update)
 	}
 }

@@ -7,6 +7,8 @@ import (
 	"todoist-tg/internal/storage"
 
 	"github.com/jmoiron/sqlx"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 type NotificationTaskRepository struct {

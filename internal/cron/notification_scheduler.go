@@ -35,9 +35,7 @@ func (s *NotificationScheduler) Run(ctx context.Context) error {
 			return err
 		}
 
-		client := todoist.NewTodoistClient(accessToken)
-
-		tasks, err := client.GetTasks()
+		tasks, err := todoist.NewTodoistClient(accessToken).GetTasks()
 		if err != nil {
 			return err
 		}
