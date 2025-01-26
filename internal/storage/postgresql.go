@@ -1,12 +1,14 @@
 package storage
 
 import (
+	"embed"
 	"fmt"
 	"os"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
+	"github.com/pressly/goose/v3"
 )
 
 var (
@@ -60,4 +62,17 @@ func OpenPostgres() (*sqlx.DB, error) {
 	}
 
 	return nil, fmt.Errorf("failed to connect to postgres after %d attempts", POSTGRES_CONNECT_RETRY_COUNT)
+}
+
+func Migrate(fs embed.FS, migrationsDirectory string) error {
+	connection, err := OpenPostgres()
+	if err != nil {
+		return err
+	}
+
+	goose.SetBaseFS(fs)
+	goose.SetTableName("_migrations")
+	goose.SetDialect("postgres")
+
+	return goose.Up(connection.DB, migrationsDirectory)
 }

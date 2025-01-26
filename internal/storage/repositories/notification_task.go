@@ -12,11 +12,15 @@ import (
 )
 
 type NotificationTaskRepository struct {
-	db *sqlx.DB
+	connection *sqlx.DB
+}
+
+func NewNotificationTaskRepository(connection *sqlx.DB) *NotificationTaskRepository {
+	return &NotificationTaskRepository{connection}
 }
 
 func (r *NotificationTaskRepository) GetDatabase() *sqlx.DB {
-	return r.db
+	return r.connection
 }
 
 func (r *NotificationTaskRepository) GetSoonestByTask(id string) (*storage.NotificationTask, error) {
@@ -25,7 +29,7 @@ func (r *NotificationTaskRepository) GetSoonestByTask(id string) (*storage.Notif
 	`
 
 	var task storage.NotificationTask
-	if err := r.db.Get(&task, query, fmt.Sprintf("%s%%", id)); err != nil {
+	if err := r.connection.Get(&task, query, fmt.Sprintf("%s%%", id)); err != nil {
 		return nil, err
 	}
 
@@ -34,7 +38,7 @@ func (r *NotificationTaskRepository) GetSoonestByTask(id string) (*storage.Notif
 
 func (r *NotificationTaskRepository) GetById(id string) (*storage.NotificationTask, error) {
 	var task storage.NotificationTask
-	if err := r.db.Get(&task, `SELECT * FROM "notification_tasks" WHERE id = $1 LIMIT 1`, id); err != nil {
+	if err := r.connection.Get(&task, `SELECT * FROM "notification_tasks" WHERE id = $1 LIMIT 1`, id); err != nil {
 		return nil, err
 	}
 
@@ -47,7 +51,7 @@ func (r *NotificationTaskRepository) GetAllExpired(ctx context.Context, t time.T
 		WHERE send_threshold < $1
 	`
 	var tasks []*storage.NotificationTask
-	if err := r.db.SelectContext(ctx, &tasks, query, t); err != nil {
+	if err := r.connection.SelectContext(ctx, &tasks, query, t); err != nil {
 		return nil, err
 	}
 
@@ -69,7 +73,7 @@ func (r *NotificationTaskRepository) CreateOrUpdate(task *storage.NotificationTa
 			modified_at = now()
 		WHERE id = $1`
 
-		_, err = r.db.Exec(query,
+		_, err = r.connection.Exec(query,
 			task.Id,
 			task.TaskId,
 			task.ChatId,
@@ -81,7 +85,7 @@ func (r *NotificationTaskRepository) CreateOrUpdate(task *storage.NotificationTa
 			VALUES ($1, $2, $3, $4, $5, now(), now())
 		`
 
-		_, err = r.db.Exec(query,
+		_, err = r.connection.Exec(query,
 			task.Id,
 			task.TaskId,
 			task.ChatId,
@@ -97,7 +101,7 @@ func (r *NotificationTaskRepository) Delete(ctx context.Context, task *storage.N
 		DELETE FROM "notification_tasks" 
 		WHERE id = $1
 	`
-	_, err := r.db.ExecContext(ctx, query, task.Id)
+	_, err := r.connection.ExecContext(ctx, query, task.Id)
 	if err != nil {
 		return err
 	}
@@ -109,14 +113,10 @@ func (r *NotificationTaskRepository) DeleteAllByTask(ctx context.Context, id str
 	query := `
 		DELETE FROM "notification_tasks" WHERE id LIKE $1
 	`
-	_, err := r.db.ExecContext(ctx, query, fmt.Sprintf("%s%%", id))
+	_, err := r.connection.ExecContext(ctx, query, fmt.Sprintf("%s%%", id))
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func NewNotificationTaskRepository(db *sqlx.DB) *NotificationTaskRepository {
-	return &NotificationTaskRepository{db}
 }

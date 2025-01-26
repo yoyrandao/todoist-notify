@@ -18,7 +18,6 @@ import (
 	"todoist-tg/internal/utils"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	goose "github.com/pressly/goose/v3"
 )
 
 var (
@@ -32,24 +31,7 @@ var (
 
 //go:generate cp -r ../../migrations ./migrations
 //go:embed migrations/*.sql
-var embedMigrations embed.FS
-
-func migrate() error {
-	db, err := storage.OpenPostgres()
-	if err != nil {
-		return err
-	}
-
-	goose.SetBaseFS(embedMigrations)
-	goose.SetTableName("_migrations")
-	goose.SetDialect("postgres")
-
-	if err := goose.Up(db.DB, "migrations"); err != nil {
-		return err
-	}
-
-	return nil
-}
+var embedFs embed.FS
 
 func main() {
 	utils.ConfigureLogging(LOG_LEVEL)
@@ -73,7 +55,7 @@ func main() {
 		"unknown": commands.NewUnknownCommandHandler(container),
 	}
 
-	if err := migrate(); err != nil {
+	if err := storage.Migrate(embedFs, "migrations"); err != nil {
 		utils.LogFatal(err)
 	}
 
@@ -95,7 +77,7 @@ func main() {
 
 		if err := handler.Handle(ctx, u); err != nil {
 			bot.Api.Send(telegram.NewMessage(u.Message.Chat.ID, "Something went wrong, try again later."))
-			slog.Error(err.Error())
+			slog.Error("", "error", err.Error())
 		}
 	})
 

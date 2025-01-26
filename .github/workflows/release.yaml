@@ -16,6 +16,7 @@ jobs:
         service:
           - telegram-bot
           - notification-scheduler
+          - user-support-api
     permissions:
       contents: read
       packages: write

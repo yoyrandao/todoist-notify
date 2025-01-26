@@ -10,8 +10,9 @@ This bot can periodically notify about your planned tasks marked with specific l
 
 Every notification is calculated according to your 'due to' settings in Todoist task.`
 
-var GettingStarted = `Caution: Fine-granted authorization process is in development! Developer access token provides full access to your account. Do it on your own risk! 
+var GettingStarted = `Open the button below to authorize the bot and get access to your Todoist account.
 
-Go to your Profile -> Settings -> Integrations -> Developer and copy access token from there.`
+Bot will get permissions to read all your tasks and projects.
+If you don't have a Todoist account yet, you can sign up here: https://todoist.com/signup.`
 
-var AddingTokenSuccessed = `Token added successfully!`
+var AuthorizationSuccessful = `Authorization successful!`

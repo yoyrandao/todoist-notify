@@ -29,3 +29,14 @@ services:
     env_file:
       - path: .env.docker
   
+  user-support-api:
+    depends_on:
+      - postgres
+    build:
+      context: .
+      dockerfile: ./build/user-support-api/Dockerfile
+    container_name: todoist_user_support_api
+    env_file:
+      - path: .env.docker
+    ports:
+      - "8080:8080"

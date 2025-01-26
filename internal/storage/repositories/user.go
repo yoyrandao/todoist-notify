@@ -10,16 +10,16 @@ import (
 )
 
 type UserRepository struct {
-	db *sqlx.DB
+	connection *sqlx.DB
 }
 
-func NewUserRepository(db *sqlx.DB) *UserRepository {
-	return &UserRepository{db}
+func NewUserRepository(connection *sqlx.DB) *UserRepository {
+	return &UserRepository{connection}
 }
 
 func (r *UserRepository) GetAll(ctx context.Context) ([]*storage.User, error) {
 	var users []*storage.User
-	if err := r.db.SelectContext(ctx, &users, `SELECT * FROM "users"`); err != nil {
+	if err := r.connection.SelectContext(ctx, &users, `SELECT * FROM "users"`); err != nil {
 		return nil, err
 	}
 
@@ -28,7 +28,7 @@ func (r *UserRepository) GetAll(ctx context.Context) ([]*storage.User, error) {
 
 func (r *UserRepository) GetByChatId(ctx context.Context, chatId int64) (*storage.User, error) {
 	var user storage.User
-	if err := r.db.GetContext(ctx, &user, `SELECT * FROM "users" WHERE chat_id = $1 LIMIT 1`, chatId); err != nil {
+	if err := r.connection.GetContext(ctx, &user, `SELECT * FROM "users" WHERE chat_id = $1 LIMIT 1`, chatId); err != nil {
 		return nil, err
 	}
 
@@ -59,7 +59,7 @@ func (r *UserRepository) CreateOrUpdate(ctx context.Context, user *storage.User)
 		`
 	}
 
-	_, err := r.db.ExecContext(ctx, query, user.ChatId, user.EncryptedTodoistAccessToken)
+	_, err := r.connection.ExecContext(ctx, query, user.ChatId, user.EncryptedTodoistAccessToken)
 	if err != nil {
 		return nil, err
 	}

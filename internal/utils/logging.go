@@ -22,7 +22,7 @@ func getLogLevel(level string) slog.Level {
 }
 
 func LogFatal(err error) {
-	slog.Error(err.Error())
+	slog.Error("", "error", err.Error())
 	os.Exit(1)
 }
 

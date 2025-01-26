@@ -29,13 +29,13 @@ func (s *NotificationSender) Run(ctx context.Context) error {
 	for _, task := range expired {
 		user, err := s.container.UserRepository.GetByChatId(ctx, task.ChatId)
 		if err != nil {
-			slog.Error(err.Error())
+			slog.Error("", "error", err.Error())
 			continue
 		}
 
 		accessToken, err := s.container.Encryptor.Decrypt(user.EncryptedTodoistAccessToken)
 		if err != nil {
-			slog.Error(err.Error())
+			slog.Error("", "error", err.Error())
 			continue
 		}
 
@@ -51,7 +51,7 @@ func (s *NotificationSender) Run(ctx context.Context) error {
 		message := fmt.Sprintf("task: %s\n\n%s", todoistTask.Content, todoistTask.Description)
 
 		if _, err := s.container.Api.Send(telegram.NewMessage(task.ChatId, message)); err != nil {
-			slog.Error(err.Error())
+			slog.Error("", "error", err.Error())
 			continue
 		}
 

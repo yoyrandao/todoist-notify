@@ -10,6 +10,11 @@
       "label": "go: embed-resources-generate cmd/notification-scheduler",
       "command": "rm -rf ./cmd/notification-scheduler/migrations && go generate ./cmd/notification-scheduler",
       "type": "shell"
+    },
+    {
+      "label": "go: embed-resources-generate cmd/user-support-api",
+      "command": "rm -rf ./cmd/user-support-api/migrations && go generate ./cmd/user-support-api",
+      "type": "shell"
     }
   ]
 }
