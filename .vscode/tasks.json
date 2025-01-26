@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "go: embed-resources-generate cmd/telegram-bot",
+      "command": "rm -rf ./cmd/telegram-bot/migrations && go generate ./cmd/telegram-bot",
+      "type": "shell"
+    },
+    {
+      "label": "go: embed-resources-generate cmd/notification-scheduler",
+      "command": "rm -rf ./cmd/notification-scheduler/migrations && go generate ./cmd/notification-scheduler",
+      "type": "shell"
+    }
+  ]
+}
