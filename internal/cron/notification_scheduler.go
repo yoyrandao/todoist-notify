@@ -57,9 +57,13 @@ func (s *NotificationScheduler) Run(ctx context.Context) error {
 
 			if err == nil {
 				if soonest.NotificationPeriod != period {
+					// delete all tasks if notification period has changed
 					if err := s.container.NotificationTaskRepository.DeleteAllByTask(ctx, task.Id); err != nil {
 						return err
 					}
+				} else {
+					// stop generating if notification period is the same
+					continue
 				}
 			} else if err.Error() != storage.ErrNoRows {
 				return err
@@ -126,7 +130,7 @@ func generateNotificationDates(now, endDate time.Time, period string) ([]time.Ti
 	switch unit {
 	case "d":
 		// Start from the current day at 12:00
-		nextDate = nowUTC.Truncate(time.Hour)
+		nextDate = time.Date(nowUTC.Year(), nowUTC.Month(), nowUTC.Day(), 12, 0, 0, 0, time.UTC)
 		for nextDate.Before(nowUTC) {
 			nextDate = nextDate.AddDate(0, 0, value)
 		}

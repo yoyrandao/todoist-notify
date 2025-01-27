@@ -16,7 +16,7 @@ func Schedule(ctx context.Context, fn func(context.Context) error, name string, 
 			case <-ctx.Done():
 				return
 
-			default:
+			case <-time.After(interval):
 				runInternal(ctx, fn, name, interval)
 			}
 		}
@@ -29,5 +29,4 @@ func runInternal(ctx context.Context, fn func(context.Context) error, name strin
 	}
 
 	slog.Debug(fmt.Sprintf("job %s successed, next run in %f seconds", name, interval.Seconds()))
-	time.Sleep(interval)
 }
