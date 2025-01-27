@@ -1,9 +1,11 @@
 package todoist
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -93,6 +95,41 @@ func (c *TodoistClient) GetTask(id string) (*Task, error) {
 	}
 
 	return task, nil
+}
+
+func GetAccessToken(grantingCode, oauthClientId, oauthClientSecret string) (*OAuthAccessToken, error) {
+	// building request parameters
+	jsonData := []byte(fmt.Sprintf(`{
+			"client_id": "%s",
+			"client_secret": "%s",
+			"code": "%s"
+		}`, oauthClientId, oauthClientSecret, grantingCode))
+
+	// building request to get access token from granting code
+	request, _ := http.NewRequest(http.MethodPost, TOKEN_EXCHANGE_URL, bytes.NewBuffer(jsonData))
+	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	// reading response body
+	payload, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// getting access token from responses
+	var accessToken OAuthAccessToken
+	if err := json.Unmarshal(payload, &accessToken); err != nil {
+		return nil, err
+	}
+
+	slog.Debug("got access token", "access_token", accessToken.AccessToken)
+
+	return &accessToken, nil
 }
 
 func (c *TodoistClient) makeGetRequest(endpoint string) (*http.Response, error) {

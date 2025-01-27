@@ -1,10 +1,6 @@
 package controllers
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -56,7 +52,7 @@ func (c *AuthorizationController) AuthorizeCallback(ctx *gin.Context) {
 	grantingCode := ctx.Query("code")
 	state := ctx.Query("state")
 
-	accessToken, err := getAccessToken(grantingCode)
+	accessToken, err := todoist.GetAccessToken(grantingCode, TODOIST_CLIENT_ID, TODOIST_CLIENT_SECRET)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -100,37 +96,4 @@ func buildAuthorizationUrl(clientId string, scope string, state string) (string,
 	request.URL.RawQuery = queryParams.Encode()
 
 	return request.URL.String(), nil
-}
-
-func getAccessToken(grantingCode string) (*todoist.OAuthAccessToken, error) {
-	// building request parameters
-	jsonData := []byte(fmt.Sprintf(`{
-		"client_id": "%s",
-		"client_secret": "%s",
-		"code": "%s"
-	}`, TODOIST_CLIENT_ID, TODOIST_CLIENT_SECRET, grantingCode))
-
-	// building request to get access token from granting code
-	request, _ := http.NewRequest(http.MethodPost, todoist.TOKEN_EXCHANGE_URL, bytes.NewBuffer(jsonData))
-	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
-
-	response, err := http.DefaultClient.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	// reading response body
-	payload, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	// getting access token from responses
-	var accessToken todoist.OAuthAccessToken
-	if err := json.Unmarshal(payload, &accessToken); err != nil {
-		return nil, err
-	}
-
-	return &accessToken, nil
 }
