@@ -14,7 +14,7 @@ import (
 
 var (
 	LOG_LEVEL = utils.GetenvOrDefault("LOG_LEVEL", "debug")
-	API_PORT  = utils.GetenvOrDefault("API_PORT", "8080")
+	PORT      = utils.GetenvOrDefault("PORT", "8080")
 
 	TELEGRAM_BOT_TOKEN      = os.Getenv("TELEGRAM_BOT_TOKEN")
 	TELEGRAM_BOT_DEBUG_MODE = utils.GetenvOrDefault("TELEGRAM_BOT_DEBUG_MODE", "false")
@@ -46,7 +46,7 @@ func main() {
 		utils.LogFatal(err)
 	}
 
-	if err := server.Run(API_PORT); err != nil {
+	if err := server.Run(PORT); err != nil {
 		utils.LogFatal(err)
 	}
 }
